@@ -41,13 +41,13 @@ const Cuserinfo = () => {
     const { data, status, selected, actions, getNames, getLabel } = useThaiAddress();
 
     // 🔥 ใช้ React Hook Form
-    const { 
-        register, 
-        handleSubmit, 
-        reset, 
+    const {
+        register,
+        handleSubmit,
+        reset,
         watch,
         setValue,
-        formState: { errors, isSubmitting } 
+        formState: { errors, isSubmitting }
     } = useForm<UserEditFormData>({
         resolver: zodResolver(userEditSchema),
         mode: "onChange",
@@ -58,26 +58,13 @@ const Cuserinfo = () => {
         }
     });
 
-    // 🔥 Sync ค่าจาก dropdown ไปยัง form
-    useEffect(() => {
-        if (selected.provinceId) {
-            setValue('users_province', getNames.getProvinceName(selected.provinceId));
-        }
-        if (selected.districtId) {
-            setValue('users_amphur', getNames.getDistrictName(selected.districtId));
-        }
-        if (selected.subDistrictId) {
-            setValue('users_tubon', getNames.getSubDistrictName(selected.subDistrictId));
-        }
-        if (selected.zipCode) {
-            setValue('users_postcode', selected.zipCode);
-        }
-    }, [selected, setValue, getNames]);
-
     // 🔥 ฟังก์ชันเช็คว่าควรขึ้น "สีเขียว" หรือไม่
     const isFieldValid = (name: keyof UserEditFormData) => {
         const value = watch(name);
-        return !errors[name] && !!value && value.toString().trim() !== "";
+        const hasError = !!errors[name]; // เช็คว่า Zod พ่น Error ออกมาหรือไม่ [cite: 10]
+
+        // คืนค่า true (สีเขียว) เฉพาะเมื่อไม่มี error และมีค่าจริงเท่านั้น [cite: 15, 76]
+        return !hasError && !!value && value.toString().trim() !== "";
     };
 
     useEffect(() => {
@@ -144,22 +131,22 @@ const Cuserinfo = () => {
             }
 
             const data = {
-                users_fname   : formData.users_fname,
-                users_sname   : formData.users_sname,
-                users_pin     : Number(formData.users_pin), // 🔥 แปลง string → number
-                users_number  : formData.users_number,
-                users_moo     : formData.users_moo,
-                users_road    : formData.users_road,
-                users_tubon   : formData.users_tubon,
-                users_amphur  : formData.users_amphur,
+                users_fname: formData.users_fname,
+                users_sname: formData.users_sname,
+                users_pin: Number(formData.users_pin), // 🔥 แปลง string → number
+                users_number: formData.users_number,
+                users_moo: formData.users_moo,
+                users_road: formData.users_road,
+                users_tubon: formData.users_tubon,
+                users_amphur: formData.users_amphur,
                 users_province: formData.users_province,
                 users_postcode: formData.users_postcode,
-                users_tel1    : formData.users_tel1,
+                users_tel1: formData.users_tel1,
             }
 
             const encodedUsersId = encrypt(dataUser.data.users_id.toString());
             await axios.post(`${process.env.WEB_DOMAIN}/api/user/updateUser/${encodedUsersId}`, data)
-            
+
             // Reload user data after update
             if (router.query.auToken) {
                 const responseUser = await axios.get(`${process.env.WEB_DOMAIN}/api/user/getUser/${router.query.auToken}`);
@@ -167,7 +154,7 @@ const Cuserinfo = () => {
                     setDataUser({ isLogin: false, data: responseUser.data.data });
                 }
             }
-            
+
             setAlert({ show: true, message: 'บันทึกข้อมูลสำเร็จ' })
 
         } catch (error) {
@@ -184,11 +171,11 @@ const Cuserinfo = () => {
             </div>
             <div className="px-5">
                 <Form noValidate onSubmit={handleSubmit(onSubmit)}>
-                    
-                    <InputLabel 
-                        label="ชื่อ" 
-                        id="users_fname" 
-                        placeholder="กรอกชื่อ" 
+
+                    <InputLabel
+                        label="ชื่อ"
+                        id="users_fname"
+                        placeholder="กรอกชื่อ"
                         {...register("users_fname")}
                         isInvalid={!!errors.users_fname}
                         errorMessage={errors.users_fname?.message}
@@ -196,10 +183,10 @@ const Cuserinfo = () => {
                         required
                     />
 
-                    <InputLabel 
-                        label="นามสกุล" 
-                        id="users_sname" 
-                        placeholder="กรอกนามสกุล" 
+                    <InputLabel
+                        label="นามสกุล"
+                        id="users_sname"
+                        placeholder="กรอกนามสกุล"
                         {...register("users_sname")}
                         isInvalid={!!errors.users_sname}
                         errorMessage={errors.users_sname?.message}
@@ -207,11 +194,11 @@ const Cuserinfo = () => {
                         required
                     />
 
-                    <InputLabel 
-                        label="Pin 4 หลัก" 
-                        id="users_pin" 
-                        placeholder="1234" 
-                        type="tel" 
+                    <InputLabel
+                        label="Pin 4 หลัก"
+                        id="users_pin"
+                        placeholder="1234"
+                        type="tel"
                         max={4}
                         {...register("users_pin")}
                         isInvalid={!!errors.users_pin}
@@ -220,27 +207,27 @@ const Cuserinfo = () => {
                         required
                     />
 
-                    <InputLabel 
-                        label="เลขที่บ้าน" 
-                        id="users_number" 
-                        placeholder="123/12" 
+                    <InputLabel
+                        label="เลขที่บ้าน"
+                        id="users_number"
+                        placeholder="123/12"
                         max={10}
                         {...register("users_number")}
                         isValid={isFieldValid("users_number")}
                     />
 
-                    <InputLabel 
-                        label="หมู่" 
-                        id="users_moo" 
-                        placeholder="1" 
+                    <InputLabel
+                        label="หมู่"
+                        id="users_moo"
+                        placeholder="1"
                         max={5}
                         {...register("users_moo")}
                         isValid={isFieldValid("users_moo")}
                     />
 
-                    <InputLabel 
-                        label="ถนน" 
-                        id="users_road" 
+                    <InputLabel
+                        label="ถนน"
+                        id="users_road"
                         placeholder="-"
                         {...register("users_road")}
                         isValid={isFieldValid("users_road")}
@@ -254,14 +241,18 @@ const Cuserinfo = () => {
                             <input type="hidden" {...register("users_province")} />
                             <input type="hidden" {...register("users_amphur")} />
                             <input type="hidden" {...register("users_tubon")} />
-                            
+
                             <SelectAddress
                                 label="จังหวัด"
                                 id="users_province"
                                 value={selected.provinceId}
                                 options={data.provinces}
-                                onChange={actions.setProvince}
-                                disabled={status.loading || !!status.error}
+                                onChange={(id) => {
+                                    actions.setProvince(id); // อัปเดต State ใน hook [cite: 216]
+                                    const name = getNames.getProvinceName(id); // ดึงชื่อภาษาไทย 
+                                    // สั่ง setValue พร้อม shouldValidate เพื่อให้ Zod ตรวจสอบทันที [cite: 10, 76]
+                                    setValue("users_province", name, { shouldValidate: true });
+                                }}
                                 placeholder="เลือกจังหวัด"
                                 isInvalid={!!errors.users_province}
                                 errorMessage={errors.users_province?.message}
@@ -275,7 +266,11 @@ const Cuserinfo = () => {
                                 id="users_amphur"
                                 value={selected.districtId}
                                 options={data.districts}
-                                onChange={actions.setDistrict}
+                                onChange={(id) => {
+                                    actions.setDistrict(id);
+                                    const name = getNames.getDistrictName(id);
+                                    setValue("users_amphur", name, { shouldValidate: true });
+                                }}
                                 disabled={!selected.provinceId}
                                 placeholder={!selected.provinceId ? "เลือกจังหวัดก่อน" : "เลือกอำเภอ"}
                                 isInvalid={!!errors.users_amphur}
@@ -290,7 +285,15 @@ const Cuserinfo = () => {
                                 id="users_tubon"
                                 value={selected.subDistrictId}
                                 options={data.subDistricts}
-                                onChange={actions.setSubDistrict}
+                                onChange={(id) => {
+                                    actions.setSubDistrict(id);
+                                    const name = getNames.getSubDistrictName(id);
+                                    setValue("users_tubon", name, { shouldValidate: true });
+
+                                    // ดึงรหัสไปรษณีย์จากข้อมูลตำบลมาใส่ในฟอร์มทันที [cite: 219]
+                                    const subDist = data.subDistricts.find(s => s.id === Number(id));
+                                    setValue("users_postcode", subDist?.zip_code ? String(subDist.zip_code) : "", { shouldValidate: true });
+                                }}
                                 disabled={!selected.districtId}
                                 placeholder={!selected.districtId ? "เลือกอำเภอก่อน" : "เลือกตำบล"}
                                 isInvalid={!!errors.users_tubon}
@@ -302,11 +305,11 @@ const Cuserinfo = () => {
                         </>
                     )}
 
-                    <InputLabel 
-                        label="รหัสไปรษณีย์" 
-                        id="users_postcode" 
-                        placeholder="รหัสไปรษณีย์จะถูกกรอกอัตโนมัติ" 
-                        type="tel" 
+                    <InputLabel
+                        label="รหัสไปรษณีย์"
+                        id="users_postcode"
+                        placeholder="รหัสไปรษณีย์จะถูกกรอกอัตโนมัติ"
+                        type="tel"
                         max={5}
                         {...register("users_postcode")}
                         isInvalid={!!errors.users_postcode}
@@ -316,11 +319,11 @@ const Cuserinfo = () => {
                         required
                     />
 
-                    <InputLabel 
-                        label="เบอร์โทรศัพท์" 
-                        id="users_tel1" 
-                        placeholder="กรอกเบอร์โทรศัพท์" 
-                        type="tel" 
+                    <InputLabel
+                        label="เบอร์โทรศัพท์"
+                        id="users_tel1"
+                        placeholder="กรอกเบอร์โทรศัพท์"
+                        type="tel"
                         max={10}
                         {...register("users_tel1")}
                         isInvalid={!!errors.users_tel1}
@@ -330,12 +333,12 @@ const Cuserinfo = () => {
                     />
 
                     <Form.Group className="d-flex justify-content-center py-3">
-                        <ButtonState 
-                            type="submit" 
-                            className={styles.button} 
-                            text={'บันทึก'} 
-                            icon="fas fa-save" 
-                            isLoading={isSubmitting} 
+                        <ButtonState
+                            type="submit"
+                            className={styles.button}
+                            text={'บันทึก'}
+                            icon="fas fa-save"
+                            isLoading={isSubmitting}
                         />
                     </Form.Group>
 
