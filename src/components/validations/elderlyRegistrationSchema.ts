@@ -20,8 +20,8 @@ export const homePhoneRule = z
     if (!val) return true;
     const trimmed = val.trim();
     if (trimmed === "") return true;
-    return trimmed.length >= 9 && trimmed.length <= 10;
-  }, "เบอร์โทรศัพท์บ้านต้องมี 9-10 หลัก");
+    return trimmed.length == 10;
+  }, "เบอร์โทรศัพท์บ้านต้องมี 10 หลัก");
 
 export const zipCodeRule = z
   .string()
