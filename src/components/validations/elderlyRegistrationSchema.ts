@@ -3,8 +3,19 @@ import * as z from 'zod';
 // --- 1. กฎพื้นฐาน ---
 export const phoneRule = z
   .string()
-  .length(10, "เบอร์โทรศัพท์ต้องมี 10 หลัก")
-  .regex(/^[0-9]+$/, "ต้องเป็นตัวเลขเท่านั้น");
+  .optional()
+  .refine((val) => {
+    if (!val) return true;
+    const trimmed = val.trim();
+    if (trimmed === "") return true;
+    return /^[0-9]+$/.test(trimmed);
+  }, "ต้องเป็นตัวเลขเท่านั้น")
+  .refine((val) => {
+    if (!val) return true;
+    const trimmed = val.trim();
+    if (trimmed === "") return true;
+    return trimmed.length === 10;
+  }, "เบอร์โทรศัพท์ต้องมี 10 หลัก");
 
 
 export const homePhoneRule = z
