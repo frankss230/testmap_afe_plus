@@ -175,15 +175,19 @@ const Cuserinfo = () => {
         }
     };
 
+    // ✅ แก้ไข: ปิด popup หลังบันทึกสำเร็จ
     const onConfirmSubmit = async () => {
         if (!pendingData) return;
         setIsSaving(true);
         try {
             await onSubmit(pendingData);
-        } finally {
-            setIsSaving(false);
+            // ✅ ปิด popup หลังบันทึกสำเร็จ
             setConfirmShow(false);
             setPendingData(null);
+        } catch (error) {
+            console.error('Error in onConfirmSubmit:', error);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -409,12 +413,10 @@ const Cuserinfo = () => {
                 messageClassName={alert.messageClassName}
                 handleClose={() => setAlert({ show: false, message: '', showClose: true, autoCloseMs: undefined, messageClassName: undefined })}
             />
+            {/* ✅ Modal ยืนยันการบันทึก - ลบปุ่ม X แล้ว */}
             <Modal show={confirmShow} centered onHide={onCancelSubmit}>
                 <Modal.Header className="py-2">
                     <h5 className="m-0">SEPAW</h5>
-                    <button type="button" className="btn outline" style={{ fontSize: 20 }} onClick={onCancelSubmit}>
-                        <i className="fa-solid fa-xmark"></i>
-                    </button>
                 </Modal.Header>
                 <Modal.Body>
                     <p>ยืนยันการบันทึกข้อมูลหรือไม่</p>
@@ -433,4 +435,3 @@ const Cuserinfo = () => {
 }
 
 export default Cuserinfo
-
