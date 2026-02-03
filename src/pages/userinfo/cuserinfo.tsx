@@ -302,7 +302,7 @@ const Cuserinfo = () => {
                             />
 
                             <SelectAddress
-                                label="ตำบล"
+                                label="อำเภอ"
                                 id="users_amphur"
                                 value={selected.districtId}
                                 options={data.districts}
@@ -316,7 +316,7 @@ const Cuserinfo = () => {
                                     setValue("users_postcode", "", { shouldValidate: true, shouldDirty: true });
                                 }}
                                 disabled={!selected.provinceId}
-                                placeholder={!selected.provinceId ? "เลือกตำบลก่อน" : "เลือกอำเภอ"}
+                                placeholder={!selected.provinceId ? "เลือกจังหวัดก่อน" : "เลือกอำเภอ"}
                                 isInvalid={!!errors.users_amphur}
                                 errorMessage={errors.users_amphur?.message}
                                 isValid={isFieldValid("users_amphur")}
