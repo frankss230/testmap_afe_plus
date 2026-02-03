@@ -1036,7 +1036,7 @@ export const replyUserData = async ({
                                         layoutBoxBaseline("จังหวัด", `${userData.users_province || '-'}`),
                                         layoutBoxBaseline("รหัสไปรษณีย์", `${userData.users_postcode || '-'}`),
                                         layoutBoxBaseline("เบอร์โทรศัพท์", `${userData.users_tel1 || '-'}`),
-                                        layoutBoxBaseline("LINE ID", userData.users_line_id),
+                                        //layoutBoxBaseline("LINE ID", userData.users_line_id),
                                     ]
 
                                 },
