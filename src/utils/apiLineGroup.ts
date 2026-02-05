@@ -179,7 +179,7 @@ export const replyNotification = async ({
                                         spacing: 'sm',
                                         contents: [
                                             layoutBoxBaseline('ชื่อ-สกุล', `${resTakecareperson.takecare_fname} ${resTakecareperson.takecare_sname}`, 4, 5),
-                                            layoutBoxBaseline('เบอร์โทร', `${resTakecareperson.takecare_tel1}`, 4, 5),
+                                            layoutBoxBaseline('เบอร์โทร', `${resTakecareperson.takecare_tel1 || '-' }`, 4, 5),
                                         ],
                                     },
                                     {
