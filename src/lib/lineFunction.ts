@@ -356,6 +356,13 @@ export const postbackAccept = async (data: any) => {
                         replyToken: data.groupId,
                         userIdAccept: data.userIdAccept,
                         message: "รับเคสช่วยเหลือแล้ว",
+                        buttons: [
+                            {
+                                type: 'postback',
+                                label: 'ปิดเคสช่วยเหลือ',
+                                data: `type=close&takecareId=${data.takecareId}&extenId=${data.extenId}&userLineId=${data.userLineId}`,
+                            },
+                        ],
                     });
                     return data.userLineId;
                 }
