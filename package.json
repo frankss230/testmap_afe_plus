@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3050",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && prisma db push --accept-data-loss && next build",
     "start": "next start",
     "lint": "next lint",
-    "vercel-build": "prisma generate && next build",
+    "vercel-build": "prisma generate && prisma db push --accept-data-loss && next build",
     "postinstall": "prisma generate"
   },
   "dependencies": {
