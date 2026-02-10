@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3050",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "vercel-build": "next build"
+    "vercel-build": "prisma generate && next build",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.4.0",
