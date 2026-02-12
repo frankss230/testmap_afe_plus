@@ -139,6 +139,15 @@ const RealtimeMap = () => {
     if (!isLoaded || !caregiver || !dependent) return
 
     const service = new window.google.maps.DirectionsService()
+    const updateNav = (result: google.maps.DirectionsResult) => {
+      const leg = result.routes?.[0]?.legs?.[0]
+      const firstStep = leg?.steps?.[0]
+      setNav({
+        instruction: (firstStep?.instructions || 'ไปยังปลายทาง').replace(/<[^>]+>/g, ''),
+        distance: leg?.distance?.text || '-',
+        duration: leg?.duration?.text || '-',
+      })
+    }
     service.route(
       {
         origin: caregiver,
@@ -148,14 +157,25 @@ const RealtimeMap = () => {
       (result, status) => {
         if (status === window.google.maps.DirectionsStatus.OK && result) {
           setDirections(result)
-          const leg = result.routes?.[0]?.legs?.[0]
-          const firstStep = leg?.steps?.[0]
-          setNav({
-            instruction: (firstStep?.instructions || 'ไปยังปลายทาง').replace(/<[^>]+>/g, ''),
-            distance: leg?.distance?.text || '-',
-            duration: leg?.duration?.text || '-',
-          })
+          updateNav(result)
+          return
         }
+        service.route(
+          {
+            origin: caregiver,
+            destination: dependent,
+            travelMode: window.google.maps.TravelMode.WALKING,
+          },
+          (result2, status2) => {
+            if (status2 === window.google.maps.DirectionsStatus.OK && result2) {
+              setDirections(result2)
+              updateNav(result2)
+            } else {
+              setDirections(null)
+              setNav({ instruction: 'ไม่พบเส้นทางบนถนน', distance: '-', duration: '-' })
+            }
+          }
+        )
       }
     )
   }, [isLoaded, caregiver, dependent])
@@ -260,23 +280,25 @@ const RealtimeMap = () => {
         ) : null}
       </GoogleMap>
 
-      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 20, background: '#fff', borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: '14px 16px 22px', pointerEvents: 'none' }}>
-        <div style={{ width: 64, height: 5, borderRadius: 8, background: '#d1d5db', margin: '0 auto 10px' }} />
-        <div style={{ fontSize: 38, lineHeight: 1, color: '#0f5f3b', fontWeight: 800 }}>{nav.duration}</div>
-        <div style={{ marginTop: 4, fontSize: 24, color: '#334155', fontWeight: 600 }}>{nav.distance}</div>
+      <div style={{ position: 'fixed', top: 12, left: 12, right: 12, zIndex: 20, background: '#0f5f3b', color: '#fff', borderRadius: 14, padding: '10px 14px' }}>
+        <div style={{ fontSize: 19, fontWeight: 700 }}>{nav.instruction}</div>
+        <div style={{ fontSize: 14, opacity: 0.9 }}>{`${nav.duration} • ${nav.distance}`}</div>
+      </div>
+
+      <div style={{ position: 'fixed', left: 12, right: 12, bottom: 16, zIndex: 20, display: 'flex', justifyContent: 'space-between', gap: 12 }}>
         {googleNavUrl ? (
           <button
             onClick={() => {
               window.location.href = googleNavUrl
             }}
-            style={{ pointerEvents: 'auto', position: 'absolute', left: 16, bottom: 16, border: '1px solid #0f5f3b', background: '#ffffff', color: '#0f5f3b', borderRadius: 999, padding: '10px 18px', fontSize: 20, fontWeight: 700 }}
+            style={{ border: '1px solid #0f5f3b', background: '#ffffff', color: '#0f5f3b', borderRadius: 999, padding: '10px 18px', fontSize: 18, fontWeight: 700 }}
           >
             เริ่มนำทางจริง
           </button>
-        ) : null}
+        ) : <span />}
         <button
           onClick={() => window.history.back()}
-          style={{ pointerEvents: 'auto', position: 'absolute', right: 16, bottom: 16, border: 'none', background: '#e11d2e', color: '#fff', borderRadius: 999, padding: '10px 24px', fontSize: 28, fontWeight: 700 }}
+          style={{ border: 'none', background: '#e11d2e', color: '#fff', borderRadius: 999, padding: '10px 24px', fontSize: 22, fontWeight: 700 }}
         >
           ออก
         </button>
