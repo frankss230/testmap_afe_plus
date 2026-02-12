@@ -180,29 +180,6 @@ const RealtimeMap = () => {
     )
   }, [isLoaded, caregiver, dependent])
 
-  useEffect(() => {
-    if (!map || !caregiver || !dependent) return
-
-    const bounds = new google.maps.LatLngBounds()
-    bounds.extend(caregiver)
-    bounds.extend(dependent)
-
-    if (safezone) {
-      const maxRadius = Math.max(safezone.radiusLv1 || 0, safezone.radiusLv2 || 0)
-      if (maxRadius > 0) {
-        const dLat = maxRadius / 111320
-        const dLng = maxRadius / (111320 * Math.cos((safezone.lat * Math.PI) / 180))
-        bounds.extend({ lat: safezone.lat + dLat, lng: safezone.lng + dLng })
-        bounds.extend({ lat: safezone.lat - dLat, lng: safezone.lng - dLng })
-      }
-    }
-
-    map.fitBounds(bounds, { top: 160, right: 160, bottom: 220, left: 160 })
-    const z = map.getZoom() || 0
-    if (z > 14) map.setZoom(14)
-    if (z < 13) map.setZoom(13)
-  }, [map, caregiver, dependent, safezone])
-
   if (!isLoaded) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
@@ -217,7 +194,7 @@ const RealtimeMap = () => {
         onLoad={(m) => setMap(m)}
         mapContainerStyle={mapStyle}
         center={center}
-        zoom={14}
+        zoom={13}
         options={{
           mapTypeControl: true,
           streetViewControl: false,
