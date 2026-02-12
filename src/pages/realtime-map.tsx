@@ -39,13 +39,13 @@ const RealtimeMap = () => {
     googleMapsApiKey: (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY || process.env.GoogleMapsApiKey) as string,
   })
 
+  const [map, setMap] = useState<google.maps.Map | null>(null)
   const [caregiver, setCaregiver] = useState<Point | null>(null)
   const [dependent, setDependent] = useState<Point | null>(null)
   const [trail, setTrail] = useState<Point[]>([])
   const [safezone, setSafezone] = useState<SafezoneInfo | null>(null)
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null)
-  const [mapCenter, setMapCenter] = useState<Point>(DEFAULT_CENTER)
-  const [isCenterInitialized, setIsCenterInitialized] = useState(false)
+  const [isViewInitialized, setIsViewInitialized] = useState(false)
   const [nav, setNav] = useState({
     instruction: 'กำลังคำนวณเส้นทาง',
     distance: '-',
@@ -184,11 +184,11 @@ const RealtimeMap = () => {
   }, [isLoaded, caregiver, dependent])
 
   useEffect(() => {
-    if (isCenterInitialized) return
-    if (!caregiver && !dependent) return
-    setMapCenter(dependent || caregiver || DEFAULT_CENTER)
-    setIsCenterInitialized(true)
-  }, [caregiver, dependent, isCenterInitialized])
+    if (!map || isViewInitialized) return
+    const target = dependent || caregiver || DEFAULT_CENTER
+    map.panTo(target)
+    setIsViewInitialized(true)
+  }, [map, dependent, caregiver, isViewInitialized])
 
   if (!isLoaded) {
     return (
@@ -201,8 +201,8 @@ const RealtimeMap = () => {
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
       <GoogleMap
+        onLoad={(m) => setMap(m)}
         mapContainerStyle={mapStyle}
-        center={mapCenter}
         options={{
           mapTypeControl: true,
           streetViewControl: false,
