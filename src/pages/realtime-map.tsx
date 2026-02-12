@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
-import { GoogleMap, Marker, useLoadScript, DirectionsRenderer } from '@react-google-maps/api'
+import { DirectionsRenderer, GoogleMap, Marker, useLoadScript } from '@react-google-maps/api'
 import Spinner from 'react-bootstrap/Spinner'
 import { encrypt } from '@/utils/helpers'
 
@@ -25,7 +25,11 @@ const RealtimeMap = () => {
   const [caregiver, setCaregiver] = useState<Point | null>(null)
   const [dependent, setDependent] = useState<Point | null>(null)
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null)
-  const [summary, setSummary] = useState({ instruction: 'กำลังคำนวณเส้นทาง', distance: '-', duration: '-' })
+  const [nav, setNav] = useState({
+    instruction: 'กำลังคำนวณเส้นทาง',
+    distance: '-',
+    duration: '-',
+  })
   const [ctx, setCtx] = useState({ usersId: 0, takecareId: 0, safezoneId: 0 })
 
   const center = useMemo(() => dependent || caregiver || { lat: 13.8900, lng: 100.5993 }, [dependent, caregiver])
@@ -81,6 +85,7 @@ const RealtimeMap = () => {
 
   useEffect(() => {
     if (!isLoaded || !caregiver || !dependent) return
+
     const service = new window.google.maps.DirectionsService()
     service.route(
       {
@@ -92,12 +97,14 @@ const RealtimeMap = () => {
         if (status === window.google.maps.DirectionsStatus.OK && result) {
           setDirections(result)
           const leg = result.routes?.[0]?.legs?.[0]
-          const step = leg?.steps?.[0]
-          setSummary({
-            instruction: (step?.instructions || 'ไปยังปลายทาง').replace(/<[^>]+>/g, ''),
+          const firstStep = leg?.steps?.[0]
+          setNav({
+            instruction: (firstStep?.instructions || 'ไปยังปลายทาง').replace(/<[^>]+>/g, ''),
             distance: leg?.distance?.text || '-',
             duration: leg?.duration?.text || '-',
           })
+        } else {
+          setDirections(null)
         }
       }
     )
@@ -121,20 +128,16 @@ const RealtimeMap = () => {
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: true,
-          mapTypeId: google.maps.MapTypeId.SATELLITE,
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
         }}
       >
         {directions ? (
           <DirectionsRenderer
             directions={directions}
-            options={{ suppressMarkers: true, polylineOptions: { strokeColor: '#2F6FED', strokeWeight: 6 } }}
-          />
-        ) : null}
-
-        {caregiver ? (
-          <Marker
-            position={caregiver}
-            icon={{ url: 'https://maps.google.com/mapfiles/kml/pal2/icon10.png', scaledSize: new window.google.maps.Size(42, 42) }}
+            options={{
+              suppressMarkers: true,
+              polylineOptions: { strokeColor: '#2F6FED', strokeWeight: 7, strokeOpacity: 0.95 },
+            }}
           />
         ) : null}
         {dependent ? (
@@ -143,23 +146,36 @@ const RealtimeMap = () => {
             icon={{ url: 'https://maps.google.com/mapfiles/kml/pal2/icon6.png', scaledSize: new window.google.maps.Size(42, 42) }}
           />
         ) : null}
+        {caregiver ? (
+          <Marker
+            position={caregiver}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 7,
+              fillColor: '#2F6FED',
+              fillOpacity: 1,
+              strokeColor: '#FFFFFF',
+              strokeWeight: 2,
+            }}
+          />
+        ) : null}
       </GoogleMap>
 
-      <div style={{ position: 'fixed', top: 16, left: 16, right: 16, background: '#0f5f3b', color: '#fff', borderRadius: 16, padding: '14px 18px', zIndex: 20 }}>
+      <div style={{ position: 'fixed', top: 12, left: 12, right: 12, zIndex: 20, background: '#0f5f3b', color: '#fff', borderRadius: 14, padding: '12px 14px' }}>
         <div style={{ fontSize: 30, lineHeight: 1 }}>↑</div>
-        <div style={{ marginTop: -34, marginLeft: 42 }}>
-          <div style={{ fontSize: 18, fontWeight: 700 }}>{summary.instruction}</div>
-          <div style={{ fontSize: 14, opacity: 0.9 }}>เรียลไทม์</div>
+        <div style={{ marginTop: -32, marginLeft: 38 }}>
+          <div style={{ fontSize: 19, fontWeight: 700 }}>{nav.instruction}</div>
+          <div style={{ fontSize: 14, opacity: 0.9 }}>เส้นทางเรียลไทม์</div>
         </div>
       </div>
 
-      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, background: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: '18px 18px 24px', zIndex: 20 }}>
-        <div style={{ width: 72, height: 6, borderRadius: 10, background: '#d1d5db', margin: '0 auto 14px' }} />
-        <div style={{ fontSize: 46, lineHeight: 1, color: '#0f5f3b', fontWeight: 800 }}>{summary.duration}</div>
-        <div style={{ marginTop: 6, fontSize: 26, color: '#334155', fontWeight: 600 }}>{summary.distance}</div>
+      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 20, background: '#fff', borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: '14px 16px 22px' }}>
+        <div style={{ width: 64, height: 5, borderRadius: 8, background: '#d1d5db', margin: '0 auto 10px' }} />
+        <div style={{ fontSize: 38, lineHeight: 1, color: '#0f5f3b', fontWeight: 800 }}>{nav.duration}</div>
+        <div style={{ marginTop: 4, fontSize: 24, color: '#334155', fontWeight: 600 }}>{nav.distance}</div>
         <button
           onClick={() => window.history.back()}
-          style={{ position: 'absolute', right: 18, bottom: 20, border: 'none', background: '#e11d2e', color: '#fff', borderRadius: 999, padding: '14px 34px', fontSize: 32, fontWeight: 700 }}
+          style={{ position: 'absolute', right: 16, bottom: 16, border: 'none', background: '#e11d2e', color: '#fff', borderRadius: 999, padding: '10px 24px', fontSize: 28, fontWeight: 700 }}
         >
           ออก
         </button>
