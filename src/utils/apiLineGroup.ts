@@ -26,9 +26,12 @@ interface ReplyNotification {
         takecare_tel1 : string;
         takecare_id   : number;
     };
-    resSafezone      : {};
+    resSafezone      : {
+        safezone_id: number;
+    };
     extendedHelpId   : number;
     locationData : {
+        location_id?: number;
         locat_latitude : string;
         locat_longitude: string;
     };
@@ -203,6 +206,18 @@ export const replyNotification = async ({
                                             type: 'postback',
                                             label: 'ตอบรับเคสช่วยเหลือ',
                                             data: `type=accept&takecareId=${resTakecareperson.takecare_id}&extenId=${extendedHelpId}&userLineId=${resUser.users_line_id}`,
+                                        },
+                                    },
+                                    {
+                                        type: 'button',
+                                        style: 'primary',
+                                        height: 'sm',
+                                        margin: 'xxl',
+                                        color: '#1DB446',
+                                        action: {
+                                            type: 'uri',
+                                            label: 'เธ”เธนเนเธเธเธ—เธตเนเน€เธฃเธตเธขเธฅเนเธ—เธกเน',
+                                            uri: `${WEB_API}/location?auToken=${resUser.users_line_id}&idsafezone=${resSafezone.safezone_id}&idlocation=${locationData?.location_id ?? ''}`
                                         },
                                     },
                                     {
