@@ -252,7 +252,7 @@ const Setting = () => {
                                 <Marker
                                     position={{ lat: location.latitude, lng: location.longitude }}
                                     icon={{
-                                        url: 'https://maps.google.com/mapfiles/kml/pal2/icon10.png',
+                                        url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
                                         scaledSize: new window.google.maps.Size(35, 35),
                                     }}
                                 >
@@ -273,7 +273,7 @@ const Setting = () => {
                                     <Marker
                                         position={{ lat: dependentLocation.latitude, lng: dependentLocation.longitude }}
                                         icon={{
-                                            url: 'https://maps.google.com/mapfiles/kml/pal2/icon6.png',
+                                            url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
                                             scaledSize: new window.google.maps.Size(35, 35),
                                         }}
                                     />
