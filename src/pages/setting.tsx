@@ -42,7 +42,7 @@ const Setting = () => {
 
     const containerStyle = {
         width: '100vw',
-        height: '50vh'
+        height: isRealtimeView ? '100vh' : '50vh'
     };
 
     const [mapRef, setMapRef] = useState()
@@ -231,7 +231,7 @@ const Setting = () => {
                     </div>
                 ) : (
                     <>
-                        <div style={{ height: '50vh' }}>
+                        <div style={{ height: isRealtimeView ? '100vh' : '50vh' }}>
                             <GoogleMap
                                 clickableIcons={false}
                                 mapContainerStyle={containerStyle}
@@ -283,21 +283,21 @@ const Setting = () => {
                             </GoogleMap>
                         </div>
 
-                        <Container className="py-3">
-                            {!isRealtimeView ? <Row className="py-3">
+                        {!isRealtimeView ? <Container className="py-3">
+                            <Row className="py-3">
                                 <Col sm={12}>
                                     <p>รัศมี เขตปลอดภัย ชั้นที่ 1 : <span style={{ fontSize: 20, color: '#000' }}>{range1}</span> (เมตร)</p>
                                     <RangeSlider max={range2} value={range1} onChange={(e) => setRange1(e)} />
                                 </Col>
-                            </Row> : null}
-                            {!isRealtimeView ? <Row className="py-3">
+                            </Row>
+                            <Row className="py-3">
                                 <Col sm={12}>
                                     <p>รัศมี เขตปลอดภัย ชั้นที่ 2 : <span style={{ fontSize: 20, color: '#000' }}>{range2}</span> (เมตร)</p>
                                     <RangeSlider min={range1} value={range2} onChange={(e) => setRange2(e)} typeClass={2} />
                                 </Col>
-                            </Row> : null}
+                            </Row>
                             {
-                                !isRealtimeView && dataUser.takecareData && dataUser.userData ? (
+                                dataUser.takecareData && dataUser.userData ? (
                                         <Row>
                                             <Col sm={12}>
                                                 <ButtonState className={styles.button} text={'บันทึก'} icon="fas fa-save" isLoading={isLoading} onClick={() => handleSave()} />
@@ -306,7 +306,7 @@ const Setting = () => {
                                 ) : null
                             }
                             
-                        </Container>
+                        </Container> : null}
                         <ModalAlert show={alert.show} message={alert.message} handleClose={() => setAlert({ show: false, message: '' })} />
                     </>
                 )
