@@ -51,6 +51,12 @@ const RealtimeMap = () => {
   const [ctx, setCtx] = useState({ usersId: 0, takecareId: 0, safezoneId: 0 })
 
   const center = useMemo(() => dependent || caregiver || { lat: 13.8900, lng: 100.5993 }, [dependent, caregiver])
+  const googleNavUrl = useMemo(() => {
+    if (!caregiver || !dependent) return ''
+    const origin = `${caregiver.lat},${caregiver.lng}`
+    const destination = `${dependent.lat},${dependent.lng}`
+    return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving&dir_action=navigate`
+  }, [caregiver, dependent])
 
   useEffect(() => {
     const loadContext = async () => {
@@ -244,18 +250,20 @@ const RealtimeMap = () => {
         ) : null}
       </GoogleMap>
 
-      <div style={{ position: 'fixed', top: 12, left: 12, right: 12, zIndex: 20, pointerEvents: 'none', background: '#0f5f3b', color: '#fff', borderRadius: 14, padding: '12px 14px' }}>
-        <div style={{ fontSize: 30, lineHeight: 1 }}>↑</div>
-        <div style={{ marginTop: -32, marginLeft: 38 }}>
-          <div style={{ fontSize: 19, fontWeight: 700 }}>{nav.instruction}</div>
-          <div style={{ fontSize: 14, opacity: 0.9 }}>เส้นทางเรียลไทม์</div>
-        </div>
-      </div>
-
       <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 20, background: '#fff', borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: '14px 16px 22px', pointerEvents: 'none' }}>
         <div style={{ width: 64, height: 5, borderRadius: 8, background: '#d1d5db', margin: '0 auto 10px' }} />
         <div style={{ fontSize: 38, lineHeight: 1, color: '#0f5f3b', fontWeight: 800 }}>{nav.duration}</div>
         <div style={{ marginTop: 4, fontSize: 24, color: '#334155', fontWeight: 600 }}>{nav.distance}</div>
+        {googleNavUrl ? (
+          <button
+            onClick={() => {
+              window.location.href = googleNavUrl
+            }}
+            style={{ pointerEvents: 'auto', position: 'absolute', left: 16, bottom: 16, border: '1px solid #0f5f3b', background: '#ffffff', color: '#0f5f3b', borderRadius: 999, padding: '10px 18px', fontSize: 20, fontWeight: 700 }}
+          >
+            เปิดใน Google Maps
+          </button>
+        ) : null}
         <button
           onClick={() => window.history.back()}
           style={{ pointerEvents: 'auto', position: 'absolute', right: 16, bottom: 16, border: 'none', background: '#e11d2e', color: '#fff', borderRadius: 999, padding: '10px 24px', fontSize: 28, fontWeight: 700 }}
