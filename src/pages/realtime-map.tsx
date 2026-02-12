@@ -44,7 +44,7 @@ const RealtimeMap = () => {
   const [safezone, setSafezone] = useState<SafezoneInfo | null>(null)
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null)
   const [nav, setNav] = useState({
-    instruction: 'กำลังคำนวณเส้นทาง',
+    instruction: 'Calculating route',
     distance: '-',
     duration: '-',
   })
@@ -143,7 +143,7 @@ const RealtimeMap = () => {
       const leg = result.routes?.[0]?.legs?.[0]
       const firstStep = leg?.steps?.[0]
       setNav({
-        instruction: (firstStep?.instructions || 'ไปยังปลายทาง').replace(/<[^>]+>/g, ''),
+        instruction: (firstStep?.instructions || 'Proceed to destination').replace(/<[^>]+>/g, ''),
         distance: leg?.distance?.text || '-',
         duration: leg?.duration?.text || '-',
       })
@@ -172,7 +172,7 @@ const RealtimeMap = () => {
               updateNav(result2)
             } else {
               setDirections(null)
-              setNav({ instruction: 'ไม่พบเส้นทางบนถนน', distance: '-', duration: '-' })
+              setNav({ instruction: 'No road route found', distance: '-', duration: '-' })
             }
           }
         )
@@ -197,10 +197,10 @@ const RealtimeMap = () => {
       }
     }
 
-    map.fitBounds(bounds, { top: 120, right: 120, bottom: 170, left: 120 })
+    map.fitBounds(bounds, { top: 160, right: 160, bottom: 220, left: 160 })
     const z = map.getZoom() || 0
-    if (z > 16) map.setZoom(16)
-    if (z < 14) map.setZoom(14)
+    if (z > 14) map.setZoom(14)
+    if (z < 13) map.setZoom(13)
   }, [map, caregiver, dependent, safezone])
 
   if (!isLoaded) {
@@ -217,7 +217,7 @@ const RealtimeMap = () => {
         onLoad={(m) => setMap(m)}
         mapContainerStyle={mapStyle}
         center={center}
-        zoom={15}
+        zoom={14}
         options={{
           mapTypeControl: true,
           streetViewControl: false,
@@ -297,26 +297,6 @@ const RealtimeMap = () => {
         <div style={{ fontSize: 14, opacity: 0.9 }}>{`${nav.duration} • ${nav.distance}`}</div>
       </div>
 
-      <button
-        onClick={() => router.back()}
-        style={{
-          position: 'fixed',
-          top: 78,
-          right: 12,
-          zIndex: 30,
-          border: 'none',
-          background: '#ef233c',
-          color: '#fff',
-          borderRadius: 999,
-          padding: '10px 18px',
-          fontSize: 18,
-          fontWeight: 700,
-          cursor: 'pointer',
-        }}
-      >
-        ออก
-      </button>
-
       <div
         style={{
           position: 'fixed',
@@ -344,7 +324,7 @@ const RealtimeMap = () => {
               fontWeight: 700,
             }}
           >
-            เริ่มนำทางจริง
+            Start navigation
           </button>
         ) : null}
       </div>
@@ -352,5 +332,3 @@ const RealtimeMap = () => {
   )
 }
 export default RealtimeMap
-
-
