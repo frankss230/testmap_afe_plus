@@ -52,11 +52,10 @@ const RealtimeMap = () => {
 
   const center = useMemo(() => dependent || caregiver || { lat: 13.8900, lng: 100.5993 }, [dependent, caregiver])
   const googleNavUrl = useMemo(() => {
-    if (!caregiver || !dependent) return ''
-    const origin = `${caregiver.lat},${caregiver.lng}`
+    if (!dependent) return ''
     const destination = `${dependent.lat},${dependent.lng}`
-    return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}&travelmode=driving&dir_action=navigate`
-  }, [caregiver, dependent])
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}&travelmode=driving&dir_action=navigate`
+  }, [dependent])
 
   useEffect(() => {
     const loadContext = async () => {
@@ -167,11 +166,22 @@ const RealtimeMap = () => {
     const bounds = new google.maps.LatLngBounds()
     bounds.extend(caregiver)
     bounds.extend(dependent)
-    map.fitBounds(bounds, 120)
-    if (map.getZoom() && (map.getZoom() as number) > 17) {
-      map.setZoom(17)
+
+    if (safezone) {
+      const maxRadius = Math.max(safezone.radiusLv1 || 0, safezone.radiusLv2 || 0)
+      if (maxRadius > 0) {
+        const dLat = maxRadius / 111320
+        const dLng = maxRadius / (111320 * Math.cos((safezone.lat * Math.PI) / 180))
+        bounds.extend({ lat: safezone.lat + dLat, lng: safezone.lng + dLng })
+        bounds.extend({ lat: safezone.lat - dLat, lng: safezone.lng - dLng })
+      }
     }
-  }, [map, caregiver, dependent])
+
+    map.fitBounds(bounds, { top: 80, right: 80, bottom: 320, left: 80 })
+    const z = map.getZoom() || 0
+    if (z > 16) map.setZoom(16)
+    if (z < 13) map.setZoom(13)
+  }, [map, caregiver, dependent, safezone])
 
   if (!isLoaded) {
     return (
@@ -261,7 +271,7 @@ const RealtimeMap = () => {
             }}
             style={{ pointerEvents: 'auto', position: 'absolute', left: 16, bottom: 16, border: '1px solid #0f5f3b', background: '#ffffff', color: '#0f5f3b', borderRadius: 999, padding: '10px 18px', fontSize: 20, fontWeight: 700 }}
           >
-            เปิดใน Google Maps
+            เริ่มนำทางจริง
           </button>
         ) : null}
         <button
