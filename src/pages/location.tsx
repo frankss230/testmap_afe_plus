@@ -23,7 +23,7 @@ const Location = () => {
     const router = useRouter();
     // const { loadScript } = useLoadScript();
     const { isLoaded } = useLoadScript({
-        googleMapsApiKey: (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY || process.env.GoogleMapsApiKey) as string
+        googleMapsApiKey: process.env.GoogleMapsApiKey as string
     });
     const containerStyle = {
         width: '100vw',
@@ -38,7 +38,6 @@ const Location = () => {
     const [directions, setDirections] = useState<any | null>(null);
     const [range1, setRange1] = useState(10)
     const [range2, setRange2] = useState(20)
-    const [lastRealtimeAt, setLastRealtimeAt] = useState<string>('');
 
 
     const [origin, setOrigin] = useState({ lat: 0, lng: 0 }); // Default origin
@@ -61,7 +60,6 @@ const Location = () => {
                         lat: Number(data.locat_latitude),
                         lng: Number(data.locat_longitude),
                     });
-                    setLastRealtimeAt(new Date().toLocaleTimeString('th-TH'));
                 }
             } catch (err) {
                 console.log("realtime location error", err);
@@ -131,13 +129,11 @@ const Location = () => {
                     lat: Number(data.locat_latitude),
                     lng: Number(data.locat_longitude),
                 });
-                setLastRealtimeAt(new Date().toLocaleTimeString('th-TH'));
             } else {
                 setDestination({
                     lat: Number(safezoneData.safez_latitude),
                     lng: Number(safezoneData.safez_longitude),
                 });
-                setLastRealtimeAt(new Date().toLocaleTimeString('th-TH'));
             }
             setLoading(false)
         } catch (error) {
@@ -234,7 +230,7 @@ const Location = () => {
                                     handleMarkerClick(1, destination.lat, destination.lng, 'ผู้มีภาวะพึ่งพิง');
                                 }}
                             >
-                                {infoWindowData.show && infoWindowData.id === 1 && (
+                                {infoWindowData.show && (
                                     <InfoWindow
                                         onCloseClick={() => {
                                             setInfoWindowData({ id: 0, address: '', show: false });
@@ -250,9 +246,6 @@ const Location = () => {
                                     url: 'https://maps.google.com/mapfiles/kml/pal2/icon10.png',
                                     scaledSize: new window.google.maps.Size(35, 35),
                                 }}
-                                onClick={() => {
-                                    handleMarkerClick(2, origin.lat, origin.lng, 'ผู้ดูแล');
-                                }}
                             >
                                 <>
                                     <Circle
@@ -265,15 +258,6 @@ const Location = () => {
                                         radius={range2}
                                         options={{ fillColor: "#F24C3D", strokeColor: "#F24C3D", fillOpacity: 0.1 }}
                                     />
-                                    {infoWindowData.show && infoWindowData.id === 2 && (
-                                        <InfoWindow
-                                            onCloseClick={() => {
-                                                setInfoWindowData({ id: 0, address: '', show: false });
-                                            }}
-                                        >
-                                            <h3>{infoWindowData.address}</h3>
-                                        </InfoWindow>
-                                    )}
                                 </>
                             </Marker>
                             {/* {directions && (
@@ -286,10 +270,6 @@ const Location = () => {
 )} */}
 
                         </GoogleMap>
-                        <div style={{ position: 'fixed', top: 12, right: 12, zIndex: 10, background: '#ffffff', padding: '8px 12px', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
-                            <div style={{ fontSize: 12, color: '#4b5563' }}>แผนที่เรียลไทม์</div>
-                            <div style={{ fontSize: 12, color: '#111827' }}>อัปเดตล่าสุด: {lastRealtimeAt || '-'}</div>
-                        </div>
                         <div className={styles.buttonLayout}>
                             {dataUser.takecareData?.takecare_tel1 && (
                                 <a className={`btn btn-primary ${styles.button}`} href={`tel:${dataUser.takecareData?.takecare_tel1}`}> โทรหาผู้มีภาวะพึ่งพิง <i className="fas fa-phone"></i> </a>)}

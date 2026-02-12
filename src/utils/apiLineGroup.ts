@@ -41,15 +41,6 @@ interface ReplyNoti {
     replyToken : string;
     message    : string;
     userIdAccept: string;
-    buttons?: ReplyNotiButton[];
-}
-
-interface ReplyNotiButton {
-    label: string;
-    type: "postback" | "uri" | "message";
-    data?: string;
-    uri?: string;
-    text?: string;
 }
 
 export const getUserProfile = async (userId: string) => {
@@ -213,10 +204,22 @@ export const replyNotification = async ({
                                         style: 'primary',
                                         height: 'sm',
                                         margin: 'xxl',
+                                        color: '#4477CE',
+                                        action: {
+                                            type: 'postback',
+                                            label: 'ปิดเคสช่วยเหลือ',
+                                            data: `type=close&takecareId=${resTakecareperson.takecare_id}&extenId=${extendedHelpId}&userLineId=${resUser.users_line_id}`,
+                                        },
+                                    },
+                                    {
+                                        type: 'button',
+                                        style: 'primary',
+                                        height: 'sm',
+                                        margin: 'xxl',
                                         color: '#1DB446',
                                         action: {
                                             type: 'uri',
-                                            label: 'เธ”เธนเนเธเธเธ—เธตเนเน€เธฃเธตเธขเธฅเนเธ—เธกเน',
+                                            label: 'ดูแผนที่เรียลไทม์',
                                             uri: `${WEB_API}/location?auToken=${resUser.users_line_id}&idsafezone=${resSafezone.safezone_id}&idlocation=${locationData?.location_id ?? ''}`
                                         },
                                     },
@@ -272,8 +275,7 @@ export const replyNotification = async ({
 export const replyNoti = async ({
     replyToken,
     userIdAccept,
-    message,
-    buttons = [],
+    message
 }: ReplyNoti) => {
     try {
         const profile = await getUserProfile(userIdAccept);
@@ -309,19 +311,7 @@ export const replyNoti = async ({
                                     margin: "md",
                                     color: "#555555",
                                     size: "md"
-                                },
-                                ...buttons.map((b) => ({
-                                    type: "button",
-                                    style: "primary",
-                                    height: "sm",
-                                    margin: "md",
-                                    action:
-                                        b.type === "postback"
-                                            ? { type: "postback", label: b.label, data: b.data || "" }
-                                            : b.type === "uri"
-                                                ? { type: "uri", label: b.label, uri: b.uri || "" }
-                                                : { type: "message", label: b.label, text: b.text || "" },
-                                })),
+                                }
                             ]
                         }
                     }
