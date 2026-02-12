@@ -38,6 +38,7 @@ interface SafezoneStage {
 }
 const Setting = () => {
     const router = useRouter();
+    const isRealtimeView = router.query.view === 'realtime';
 
     const containerStyle = {
         width: '100vw',
@@ -58,6 +59,7 @@ const Setting = () => {
     const [range2, setRange2] = useState(20)
     const [dataUser, setDataUser] = useState<DataUserState>({ isLogin: false, userData: null, takecareData: null })
     const [idSafezoneStage, setIdSafezoneStage] = useState(0)
+    const [dependentLocation, setDependentLocation] = useState<Location | null>(null)
 
     useEffect(() => {
         const auToken = router.query.auToken
@@ -89,11 +91,27 @@ const Setting = () => {
                 setRange1(data.safez_radiuslv1)
                 setRange2(data.safez_radiuslv2)
                 setIdSafezoneStage(Number(idSafezone))
+                onGetLocation(data, takecareData, userData)
             }
         } catch (error) {
             console.log("🚀 ~ file: registration.tsx:66 ~ onGetUserData ~ error:", error)
             setDataUser({ isLogin: false, userData: null, takecareData: null })
             setAlert({ show: true, message: 'ระบบไม่สามารถดึงข้อมูลของท่านได้ กรุณาลองใหม่อีกครั้ง' })
+        }
+    }
+
+    const onGetLocation = async (safezoneData: any, takecareData: any, userData: any) => {
+        try {
+            const resLocation = await axios.get(`${process.env.WEB_DOMAIN}/api/location/getLocation?takecare_id=${takecareData.takecare_id}&users_id=${userData.users_id}&safezone_id=${safezoneData.safezone_id}&location_id=${router.query.idlocation}`);
+            if (resLocation.data?.data) {
+                const data = resLocation.data.data
+                setDependentLocation({
+                    latitude: Number(data.locat_latitude),
+                    longitude: Number(data.locat_longitude),
+                })
+            }
+        } catch (error) {
+            console.log("realtime location error", error)
         }
     }
 
@@ -168,6 +186,7 @@ const Setting = () => {
     };
 
     const onMapClick = (e: google.maps.MapMouseEvent) => {
+        if (isRealtimeView) return
         if (e.latLng) {
             setLocation({
                 latitude: e.latLng.lat(),
@@ -175,6 +194,27 @@ const Setting = () => {
             });
         }
     }
+    useEffect(() => {
+        if (!isRealtimeView) return
+        if (!dataUser.takecareData || !dataUser.userData || !idSafezoneStage) return
+
+        const interval = setInterval(async () => {
+            try {
+                const resLocation = await axios.get(`${process.env.WEB_DOMAIN}/api/location/getLocation?takecare_id=${dataUser.takecareData.takecare_id}&users_id=${dataUser.userData.users_id}&safezone_id=${idSafezoneStage}`);
+                if (resLocation.data?.data) {
+                    const data = resLocation.data.data
+                    setDependentLocation({
+                        latitude: Number(data.locat_latitude),
+                        longitude: Number(data.locat_longitude),
+                    })
+                }
+            } catch (error) {
+                console.log("realtime location error", error)
+            }
+        }, 3000)
+
+        return () => clearInterval(interval)
+    }, [isRealtimeView, dataUser, idSafezoneStage])
     const polygonOptions = {
         strokeColor: "yellow",
         strokeOpacity: 0.5,
@@ -229,6 +269,15 @@ const Setting = () => {
                                         />
                                     </>
                                 </Marker>
+                                {dependentLocation ? (
+                                    <Marker
+                                        position={{ lat: dependentLocation.latitude, lng: dependentLocation.longitude }}
+                                        icon={{
+                                            url: 'https://maps.google.com/mapfiles/kml/pal2/icon6.png',
+                                            scaledSize: new window.google.maps.Size(35, 35),
+                                        }}
+                                    />
+                                ) : null}
 
 
                             </GoogleMap>
@@ -240,20 +289,20 @@ const Setting = () => {
                                     <p>คำแนะนำ : กรุณาเดินไปยังจุดที่ต้องการตั้งค่าจุดปลอดภัย</p>
                                 </Col>
                             </Row>
-                            <Row className="py-3">
+                            {!isRealtimeView ? <Row className="py-3">
                                 <Col sm={12}>
                                     <p>รัศมี เขตปลอดภัย ชั้นที่ 1 : <span style={{ fontSize: 20, color: '#000' }}>{range1}</span> (เมตร)</p>
                                     <RangeSlider max={range2} value={range1} onChange={(e) => setRange1(e)} />
                                 </Col>
-                            </Row>
-                            <Row className="py-3">
+                            </Row> : null}
+                            {!isRealtimeView ? <Row className="py-3">
                                 <Col sm={12}>
                                     <p>รัศมี เขตปลอดภัย ชั้นที่ 2 : <span style={{ fontSize: 20, color: '#000' }}>{range2}</span> (เมตร)</p>
                                     <RangeSlider min={range1} value={range2} onChange={(e) => setRange2(e)} typeClass={2} />
                                 </Col>
-                            </Row>
+                            </Row> : null}
                             {
-                                dataUser.takecareData && dataUser.userData ? (
+                                !isRealtimeView && dataUser.takecareData && dataUser.userData ? (
                                         <Row>
                                             <Col sm={12}>
                                                 <ButtonState className={styles.button} text={'บันทึก'} icon="fas fa-save" isLoading={isLoading} onClick={() => handleSave()} />
