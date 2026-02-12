@@ -220,7 +220,7 @@ export const replyNotification = async ({
                                         action: {
                                             type: 'uri',
                                             label: 'ดูแผนที่เรียลไทม์',
-                                            uri: `${WEB_API}/setting?view=realtime&auToken=${resUser.users_line_id}&idsafezone=${resSafezone.safezone_id}&idlocation=${locationData?.location_id ?? ''}`
+                                            uri: `${WEB_API}/realtime-map?auToken=${resUser.users_line_id}&idsafezone=${resSafezone.safezone_id}&idlocation=${locationData?.location_id ?? ''}`
                                         },
                                     },
                                     {
