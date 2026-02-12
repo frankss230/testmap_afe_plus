@@ -194,7 +194,6 @@ const RealtimeMap = () => {
         onLoad={(m) => setMap(m)}
         mapContainerStyle={mapStyle}
         center={center}
-        zoom={9}
         options={{
           mapTypeControl: true,
           streetViewControl: false,
