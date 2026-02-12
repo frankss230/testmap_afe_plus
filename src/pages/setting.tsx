@@ -252,7 +252,7 @@ const Setting = () => {
                                 <Marker
                                     position={{ lat: location.latitude, lng: location.longitude }}
                                     icon={{
-                                        url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                                        url: 'https://maps.google.com/mapfiles/kml/pal2/icon10.png',
                                         scaledSize: new window.google.maps.Size(35, 35),
                                     }}
                                 >
@@ -273,7 +273,7 @@ const Setting = () => {
                                     <Marker
                                         position={{ lat: dependentLocation.latitude, lng: dependentLocation.longitude }}
                                         icon={{
-                                            url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                                            url: 'https://maps.google.com/mapfiles/kml/pal2/icon6.png',
                                             scaledSize: new window.google.maps.Size(35, 35),
                                         }}
                                     />
@@ -284,11 +284,6 @@ const Setting = () => {
                         </div>
 
                         <Container className="py-3">
-                            <Row>
-                                <Col sm={12}>
-                                    <p>คำแนะนำ : กรุณาเดินไปยังจุดที่ต้องการตั้งค่าจุดปลอดภัย</p>
-                                </Col>
-                            </Row>
                             {!isRealtimeView ? <Row className="py-3">
                                 <Col sm={12}>
                                     <p>รัศมี เขตปลอดภัย ชั้นที่ 1 : <span style={{ fontSize: 20, color: '#000' }}>{range1}</span> (เมตร)</p>
