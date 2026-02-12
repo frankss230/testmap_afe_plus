@@ -197,10 +197,10 @@ const RealtimeMap = () => {
       }
     }
 
-    map.fitBounds(bounds, { top: 80, right: 80, bottom: 320, left: 80 })
+    map.fitBounds(bounds, { top: 120, right: 120, bottom: 170, left: 120 })
     const z = map.getZoom() || 0
     if (z > 16) map.setZoom(16)
-    if (z < 13) map.setZoom(13)
+    if (z < 14) map.setZoom(14)
   }, [map, caregiver, dependent, safezone])
 
   if (!isLoaded) {
@@ -217,7 +217,7 @@ const RealtimeMap = () => {
         onLoad={(m) => setMap(m)}
         mapContainerStyle={mapStyle}
         center={center}
-        zoom={16}
+        zoom={15}
         options={{
           mapTypeControl: true,
           streetViewControl: false,
@@ -280,31 +280,77 @@ const RealtimeMap = () => {
         ) : null}
       </GoogleMap>
 
-      <div style={{ position: 'fixed', top: 12, left: 12, right: 12, zIndex: 20, background: '#0f5f3b', color: '#fff', borderRadius: 14, padding: '10px 14px' }}>
+      <div
+        style={{
+          position: 'fixed',
+          top: 12,
+          left: 12,
+          right: 12,
+          zIndex: 20,
+          background: '#0f5f3b',
+          color: '#fff',
+          borderRadius: 14,
+          padding: '10px 14px',
+        }}
+      >
         <div style={{ fontSize: 19, fontWeight: 700 }}>{nav.instruction}</div>
         <div style={{ fontSize: 14, opacity: 0.9 }}>{`${nav.duration} • ${nav.distance}`}</div>
       </div>
 
-      <div style={{ position: 'fixed', left: 12, right: 12, bottom: 16, zIndex: 20, display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+      <button
+        onClick={() => router.back()}
+        style={{
+          position: 'fixed',
+          top: 78,
+          right: 12,
+          zIndex: 30,
+          border: 'none',
+          background: '#ef233c',
+          color: '#fff',
+          borderRadius: 999,
+          padding: '10px 18px',
+          fontSize: 18,
+          fontWeight: 700,
+          cursor: 'pointer',
+        }}
+      >
+        ออก
+      </button>
+
+      <div
+        style={{
+          position: 'fixed',
+          left: 12,
+          right: 12,
+          bottom: 16,
+          zIndex: 20,
+          display: 'flex',
+          justifyContent: 'flex-start',
+          gap: 12,
+        }}
+      >
         {googleNavUrl ? (
           <button
             onClick={() => {
               window.location.href = googleNavUrl
             }}
-            style={{ border: '1px solid #0f5f3b', background: '#ffffff', color: '#0f5f3b', borderRadius: 999, padding: '10px 18px', fontSize: 18, fontWeight: 700 }}
+            style={{
+              border: '1px solid #0f5f3b',
+              background: '#ffffff',
+              color: '#0f5f3b',
+              borderRadius: 999,
+              padding: '10px 18px',
+              fontSize: 18,
+              fontWeight: 700,
+            }}
           >
             เริ่มนำทางจริง
           </button>
-        ) : <span />}
-        <button
-          onClick={() => window.history.back()}
-          style={{ border: 'none', background: '#e11d2e', color: '#fff', borderRadius: 999, padding: '10px 24px', fontSize: 22, fontWeight: 700 }}
-        >
-          ออก
-        </button>
+        ) : null}
       </div>
     </div>
   )
 }
-
 export default RealtimeMap
+
+
