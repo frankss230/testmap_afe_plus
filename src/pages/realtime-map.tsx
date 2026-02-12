@@ -2,13 +2,28 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import axios from 'axios'
-import { DirectionsRenderer, GoogleMap, Marker, useLoadScript } from '@react-google-maps/api'
+import {
+  Circle,
+  DirectionsRenderer,
+  GoogleMap,
+  Marker,
+  Polyline,
+  useLoadScript,
+} from '@react-google-maps/api'
 import Spinner from 'react-bootstrap/Spinner'
 import { encrypt } from '@/utils/helpers'
 
 interface Point {
   lat: number
   lng: number
+}
+
+interface SafezoneInfo {
+  lat: number
+  lng: number
+  radiusLv1: number
+  radiusLv2: number
+  safezoneId: number
 }
 
 const mapStyle: React.CSSProperties = {
@@ -22,8 +37,11 @@ const RealtimeMap = () => {
     googleMapsApiKey: (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY || process.env.GoogleMapsApiKey) as string,
   })
 
+  const [map, setMap] = useState<google.maps.Map | null>(null)
   const [caregiver, setCaregiver] = useState<Point | null>(null)
   const [dependent, setDependent] = useState<Point | null>(null)
+  const [trail, setTrail] = useState<Point[]>([])
+  const [safezone, setSafezone] = useState<SafezoneInfo | null>(null)
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null)
   const [nav, setNav] = useState({
     instruction: 'กำลังคำนวณเส้นทาง',
@@ -50,16 +68,33 @@ const RealtimeMap = () => {
         const takecare = takecareRes.data?.data
         if (!takecare) return
 
-        const safezoneRes = await axios.get(`${process.env.WEB_DOMAIN}/api/setting/getSafezone?takecare_id=${takecare.takecare_id}&users_id=${user.users_id}&id=${idSafezone || ''}`)
-        const safezone = safezoneRes.data?.data
-        if (safezone) {
-          setCaregiver({ lat: Number(safezone.safez_latitude), lng: Number(safezone.safez_longitude) })
-          setCtx({ usersId: Number(user.users_id), takecareId: Number(takecare.takecare_id), safezoneId: Number(safezone.safezone_id || idSafezone || 0) })
+        const safezoneRes = await axios.get(
+          `${process.env.WEB_DOMAIN}/api/setting/getSafezone?takecare_id=${takecare.takecare_id}&users_id=${user.users_id}&id=${idSafezone || ''}`
+        )
+        const sz = safezoneRes.data?.data
+        if (sz) {
+          const cg = {
+            lat: Number(sz.safez_latitude),
+            lng: Number(sz.safez_longitude),
+          }
+          setCaregiver(cg)
+          setSafezone({
+            ...cg,
+            radiusLv1: Number(sz.safez_radiuslv1 || 0),
+            radiusLv2: Number(sz.safez_radiuslv2 || 0),
+            safezoneId: Number(sz.safezone_id || idSafezone || 0),
+          })
+          setCtx({
+            usersId: Number(user.users_id),
+            takecareId: Number(takecare.takecare_id),
+            safezoneId: Number(sz.safezone_id || idSafezone || 0),
+          })
         }
       } catch (error) {
         console.log('loadContext error', error)
       }
     }
+
     loadContext()
   }, [router.query.auToken, router.query.idsafezone])
 
@@ -68,11 +103,23 @@ const RealtimeMap = () => {
 
     const fetchDependent = async () => {
       try {
-        const res = await axios.get(`${process.env.WEB_DOMAIN}/api/location/getLocation?takecare_id=${ctx.takecareId}&users_id=${ctx.usersId}&safezone_id=${ctx.safezoneId}`)
+        const res = await axios.get(
+          `${process.env.WEB_DOMAIN}/api/location/getLocation?takecare_id=${ctx.takecareId}&users_id=${ctx.usersId}&safezone_id=${ctx.safezoneId}`
+        )
         const loc = res.data?.data
-        if (loc) {
-          setDependent({ lat: Number(loc.locat_latitude), lng: Number(loc.locat_longitude) })
+        if (!loc) return
+
+        const next = {
+          lat: Number(loc.locat_latitude),
+          lng: Number(loc.locat_longitude),
         }
+        setDependent(next)
+        setTrail((prev) => {
+          const last = prev[prev.length - 1]
+          if (last && last.lat === next.lat && last.lng === next.lng) return prev
+          const merged = [...prev, next]
+          return merged.slice(-30)
+        })
       } catch (error) {
         console.log('fetchDependent error', error)
       }
@@ -103,12 +150,22 @@ const RealtimeMap = () => {
             distance: leg?.distance?.text || '-',
             duration: leg?.duration?.text || '-',
           })
-        } else {
-          setDirections(null)
         }
       }
     )
   }, [isLoaded, caregiver, dependent])
+
+  useEffect(() => {
+    if (!map || !caregiver || !dependent) return
+
+    const bounds = new google.maps.LatLngBounds()
+    bounds.extend(caregiver)
+    bounds.extend(dependent)
+    map.fitBounds(bounds, 120)
+    if (map.getZoom() && (map.getZoom() as number) > 17) {
+      map.setZoom(17)
+    }
+  }, [map, caregiver, dependent])
 
   if (!isLoaded) {
     return (
@@ -121,14 +178,16 @@ const RealtimeMap = () => {
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
       <GoogleMap
+        onLoad={(m) => setMap(m)}
         mapContainerStyle={mapStyle}
         center={center}
-        zoom={18}
+        zoom={16}
         options={{
-          mapTypeControl: false,
+          mapTypeControl: true,
           streetViewControl: false,
           fullscreenControl: true,
           mapTypeId: google.maps.MapTypeId.ROADMAP,
+          gestureHandling: 'greedy',
         }}
       >
         {directions ? (
@@ -140,12 +199,36 @@ const RealtimeMap = () => {
             }}
           />
         ) : null}
+
+        {trail.length > 1 ? (
+          <Polyline
+            path={trail}
+            options={{ strokeColor: '#ef4444', strokeOpacity: 0.55, strokeWeight: 4 }}
+          />
+        ) : null}
+
+        {safezone ? (
+          <>
+            <Circle
+              center={{ lat: safezone.lat, lng: safezone.lng }}
+              radius={safezone.radiusLv1}
+              options={{ fillColor: '#F2BE22', strokeColor: '#F2BE22', fillOpacity: 0.2 }}
+            />
+            <Circle
+              center={{ lat: safezone.lat, lng: safezone.lng }}
+              radius={safezone.radiusLv2}
+              options={{ fillColor: '#F24C3D', strokeColor: '#F24C3D', fillOpacity: 0.1 }}
+            />
+          </>
+        ) : null}
+
         {dependent ? (
           <Marker
             position={dependent}
             icon={{ url: 'https://maps.google.com/mapfiles/kml/pal2/icon6.png', scaledSize: new window.google.maps.Size(42, 42) }}
           />
         ) : null}
+
         {caregiver ? (
           <Marker
             position={caregiver}
@@ -161,7 +244,7 @@ const RealtimeMap = () => {
         ) : null}
       </GoogleMap>
 
-      <div style={{ position: 'fixed', top: 12, left: 12, right: 12, zIndex: 20, background: '#0f5f3b', color: '#fff', borderRadius: 14, padding: '12px 14px' }}>
+      <div style={{ position: 'fixed', top: 12, left: 12, right: 12, zIndex: 20, pointerEvents: 'none', background: '#0f5f3b', color: '#fff', borderRadius: 14, padding: '12px 14px' }}>
         <div style={{ fontSize: 30, lineHeight: 1 }}>↑</div>
         <div style={{ marginTop: -32, marginLeft: 38 }}>
           <div style={{ fontSize: 19, fontWeight: 700 }}>{nav.instruction}</div>
@@ -169,13 +252,13 @@ const RealtimeMap = () => {
         </div>
       </div>
 
-      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 20, background: '#fff', borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: '14px 16px 22px' }}>
+      <div style={{ position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 20, background: '#fff', borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: '14px 16px 22px', pointerEvents: 'none' }}>
         <div style={{ width: 64, height: 5, borderRadius: 8, background: '#d1d5db', margin: '0 auto 10px' }} />
         <div style={{ fontSize: 38, lineHeight: 1, color: '#0f5f3b', fontWeight: 800 }}>{nav.duration}</div>
         <div style={{ marginTop: 4, fontSize: 24, color: '#334155', fontWeight: 600 }}>{nav.distance}</div>
         <button
           onClick={() => window.history.back()}
-          style={{ position: 'absolute', right: 16, bottom: 16, border: 'none', background: '#e11d2e', color: '#fff', borderRadius: 999, padding: '10px 24px', fontSize: 28, fontWeight: 700 }}
+          style={{ pointerEvents: 'auto', position: 'absolute', right: 16, bottom: 16, border: 'none', background: '#e11d2e', color: '#fff', borderRadius: 999, padding: '10px 24px', fontSize: 28, fontWeight: 700 }}
         >
           ออก
         </button>
