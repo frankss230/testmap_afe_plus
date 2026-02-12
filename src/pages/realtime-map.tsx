@@ -185,9 +185,10 @@ const RealtimeMap = () => {
 
   useEffect(() => {
     if (isCenterInitialized) return
-    setMapCenter(center)
+    if (!caregiver && !dependent) return
+    setMapCenter(dependent || caregiver || DEFAULT_CENTER)
     setIsCenterInitialized(true)
-  }, [center, isCenterInitialized])
+  }, [caregiver, dependent, isCenterInitialized])
 
   if (!isLoaded) {
     return (
