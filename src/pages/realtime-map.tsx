@@ -31,18 +31,21 @@ const mapStyle: React.CSSProperties = {
   height: '100vh',
 }
 
+const DEFAULT_CENTER: Point = { lat: 13.8900, lng: 100.5993 }
+
 const RealtimeMap = () => {
   const router = useRouter()
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY || process.env.GoogleMapsApiKey) as string,
   })
 
-  const [map, setMap] = useState<google.maps.Map | null>(null)
   const [caregiver, setCaregiver] = useState<Point | null>(null)
   const [dependent, setDependent] = useState<Point | null>(null)
   const [trail, setTrail] = useState<Point[]>([])
   const [safezone, setSafezone] = useState<SafezoneInfo | null>(null)
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null)
+  const [mapCenter, setMapCenter] = useState<Point>(DEFAULT_CENTER)
+  const [isCenterInitialized, setIsCenterInitialized] = useState(false)
   const [nav, setNav] = useState({
     instruction: 'Calculating route',
     distance: '-',
@@ -50,7 +53,7 @@ const RealtimeMap = () => {
   })
   const [ctx, setCtx] = useState({ usersId: 0, takecareId: 0, safezoneId: 0 })
 
-  const center = useMemo(() => dependent || caregiver || { lat: 13.8900, lng: 100.5993 }, [dependent, caregiver])
+  const center = useMemo(() => dependent || caregiver || DEFAULT_CENTER, [dependent, caregiver])
   const googleNavUrl = useMemo(() => {
     if (!dependent) return ''
     const destination = `${dependent.lat},${dependent.lng}`
@@ -180,6 +183,12 @@ const RealtimeMap = () => {
     )
   }, [isLoaded, caregiver, dependent])
 
+  useEffect(() => {
+    if (isCenterInitialized) return
+    setMapCenter(center)
+    setIsCenterInitialized(true)
+  }, [center, isCenterInitialized])
+
   if (!isLoaded) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
@@ -191,9 +200,8 @@ const RealtimeMap = () => {
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
       <GoogleMap
-        onLoad={(m) => setMap(m)}
         mapContainerStyle={mapStyle}
-        center={center}
+        center={mapCenter}
         options={{
           mapTypeControl: true,
           streetViewControl: false,
@@ -237,7 +245,14 @@ const RealtimeMap = () => {
         {dependent ? (
           <Marker
             position={dependent}
-            icon={{ url: 'https://maps.google.com/mapfiles/kml/pal2/icon6.png', scaledSize: new window.google.maps.Size(42, 42) }}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 9,
+              fillColor: '#ef4444',
+              fillOpacity: 1,
+              strokeColor: '#FFFFFF',
+              strokeWeight: 2,
+            }}
           />
         ) : null}
 
