@@ -47,7 +47,7 @@ const RealtimeMap = () => {
   const [mapCenter, setMapCenter] = useState<Point>(DEFAULT_CENTER)
   const [isCenterInitialized, setIsCenterInitialized] = useState(false)
   const [nav, setNav] = useState({
-    instruction: 'Calculating route',
+    instruction: 'กำลังคำนวณเส้นทาง',
     distance: '-',
     duration: '-',
   })
@@ -146,7 +146,7 @@ const RealtimeMap = () => {
       const leg = result.routes?.[0]?.legs?.[0]
       const firstStep = leg?.steps?.[0]
       setNav({
-        instruction: (firstStep?.instructions || 'Proceed to destination').replace(/<[^>]+>/g, ''),
+        instruction: (firstStep?.instructions || 'ไปยังปลายทาง').replace(/<[^>]+>/g, ''),
         distance: leg?.distance?.text || '-',
         duration: leg?.duration?.text || '-',
       })
@@ -175,7 +175,7 @@ const RealtimeMap = () => {
               updateNav(result2)
             } else {
               setDirections(null)
-              setNav({ instruction: 'No road route found', distance: '-', duration: '-' })
+              setNav({ instruction: 'ไม่พบเส้นทางบนถนน', distance: '-', duration: '-' })
             }
           }
         )
@@ -316,7 +316,7 @@ const RealtimeMap = () => {
               fontWeight: 700,
             }}
           >
-            Start navigation
+            เริ่มนำทางจริง
           </button>
         ) : null}
       </div>
