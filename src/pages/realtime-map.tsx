@@ -130,7 +130,7 @@ const RealtimeMap = () => {
     }
 
     fetchDependent()
-    const t = setInterval(fetchDependent, 3000)
+    const t = setInterval(fetchDependent, 1000)
     return () => clearInterval(t)
   }, [ctx])
 
@@ -149,8 +149,8 @@ const RealtimeMap = () => {
       },
       {
         enableHighAccuracy: true,
-        maximumAge: 3000,
-        timeout: 10000,
+        maximumAge: 1000,
+        timeout: 5000,
       }
     )
 
