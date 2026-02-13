@@ -30,6 +30,17 @@ interface SafezoneInfo {
 const formatCoord = (point: Point | null) =>
   point ? `${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}` : 'ยังไม่มีพิกัด'
 
+const createPersonIconUrl = (color: string) => {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44">
+      <circle cx="22" cy="22" r="20" fill="${color}" />
+      <circle cx="22" cy="15" r="6" fill="#ffffff" />
+      <path d="M11 32c0-6.4 5-10.5 11-10.5S33 25.6 33 32" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" />
+    </svg>
+  `
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+}
+
 const distanceMeters = (a: Point, b: Point) => {
   const toRad = (deg: number) => (deg * Math.PI) / 180
   const R = 6371000
@@ -281,12 +292,9 @@ const RealtimeMap = () => {
           <Marker
             position={dependent}
             icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 9,
-              fillColor: '#ef4444',
-              fillOpacity: 1,
-              strokeColor: '#FFFFFF',
-              strokeWeight: 2,
+              url: createPersonIconUrl('#ef4444'),
+              scaledSize: new window.google.maps.Size(34, 34),
+              anchor: new window.google.maps.Point(17, 17),
             }}
           />
         ) : null}
@@ -295,12 +303,9 @@ const RealtimeMap = () => {
           <Marker
             position={caregiver}
             icon={{
-              path: google.maps.SymbolPath.CIRCLE,
-              scale: 7,
-              fillColor: '#2F6FED',
-              fillOpacity: 1,
-              strokeColor: '#FFFFFF',
-              strokeWeight: 2,
+              url: createPersonIconUrl('#2F6FED'),
+              scaledSize: new window.google.maps.Size(34, 34),
+              anchor: new window.google.maps.Point(17, 17),
             }}
           />
         ) : null}
