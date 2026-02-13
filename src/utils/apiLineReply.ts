@@ -747,11 +747,23 @@ export const replyLocation = async ({
                                         {
                                             type: 'button',
                                             style: 'primary',
+                                            color: '#2E7D32',
                                             height: 'sm',
                                             action: {
                                                 type: 'uri',
                                                 label: 'ดูแผนที่จากระบบ',
                                                 uri: `${WEB_API}/location?auToken=${userData.users_line_id}&idsafezone=${safezoneData.safezone_id}&idlocation=${locationData ? locationData.location_id : ''}`
+                                            }
+                                        },
+                                        {
+                                            type: 'button',
+                                            style: 'primary',
+                                            color: '#1976D2',
+                                            height: 'sm',
+                                            action: {
+                                                type: 'uri',
+                                                label: 'ดูแผนที่แบบเรียลไทม์',
+                                                uri: `${WEB_API}/realtime-map?auToken=${userData.users_line_id}&idsafezone=${safezoneData.safezone_id}&idlocation=${locationData ? locationData.location_id : ''}&viewerRole=caregiver`
                                             }
                                         }
                                     ]
