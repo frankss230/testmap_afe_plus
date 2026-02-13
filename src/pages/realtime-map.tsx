@@ -324,10 +324,18 @@ const RealtimeMap = () => {
             fontSize: 13,
             fontWeight: 600,
             lineHeight: 1.5,
+            display: 'grid',
+            rowGap: 8,
           }}
         >
-          <div>ผู้ดูแล: {formatCoord(caregiver)}</div>
-          <div>ผู้มีภาวะพึ่งพิง: {formatCoord(dependent)}</div>
+          <div>
+            <div style={{ fontWeight: 700 }}>ผู้ดูแล</div>
+            <div>{formatCoord(caregiver)}</div>
+          </div>
+          <div>
+            <div style={{ fontWeight: 700 }}>ผู้มีภาวะพึ่งพิง</div>
+            <div>{formatCoord(dependent)}</div>
+          </div>
         </div>
       </div>
 
