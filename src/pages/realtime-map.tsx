@@ -32,20 +32,17 @@ const mapStyle: React.CSSProperties = {
 }
 
 const DEFAULT_CENTER: Point = { lat: 13.8900, lng: 100.5993 }
-
 const RealtimeMap = () => {
   const router = useRouter()
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: (process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || process.env.GOOGLE_MAPS_API_KEY || process.env.GoogleMapsApiKey) as string,
   })
 
-  const [map, setMap] = useState<google.maps.Map | null>(null)
   const [caregiver, setCaregiver] = useState<Point | null>(null)
   const [dependent, setDependent] = useState<Point | null>(null)
   const [trail, setTrail] = useState<Point[]>([])
   const [safezone, setSafezone] = useState<SafezoneInfo | null>(null)
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null)
-  const [isViewInitialized, setIsViewInitialized] = useState(false)
   const [nav, setNav] = useState({
     instruction: 'กำลังคำนวณเส้นทาง',
     distance: '-',
@@ -53,7 +50,6 @@ const RealtimeMap = () => {
   })
   const [ctx, setCtx] = useState({ usersId: 0, takecareId: 0, safezoneId: 0 })
 
-  const center = useMemo(() => dependent || caregiver || DEFAULT_CENTER, [dependent, caregiver])
   const googleNavUrl = useMemo(() => {
     if (!dependent) return ''
     const destination = `${dependent.lat},${dependent.lng}`
@@ -183,13 +179,6 @@ const RealtimeMap = () => {
     )
   }, [isLoaded, caregiver, dependent])
 
-  useEffect(() => {
-    if (!map || isViewInitialized) return
-    const target = dependent || caregiver || DEFAULT_CENTER
-    map.panTo(target)
-    setIsViewInitialized(true)
-  }, [map, dependent, caregiver, isViewInitialized])
-
   if (!isLoaded) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
@@ -201,8 +190,8 @@ const RealtimeMap = () => {
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
       <GoogleMap
-        onLoad={(m) => setMap(m)}
         mapContainerStyle={mapStyle}
+        center={DEFAULT_CENTER}
         options={{
           mapTypeControl: true,
           streetViewControl: false,
@@ -215,6 +204,7 @@ const RealtimeMap = () => {
           <DirectionsRenderer
             directions={directions}
             options={{
+              preserveViewport: true,
               suppressMarkers: true,
               polylineOptions: { strokeColor: '#2F6FED', strokeWeight: 7, strokeOpacity: 0.95 },
             }}
