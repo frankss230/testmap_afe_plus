@@ -7,6 +7,7 @@ import {
   DirectionsRenderer,
   GoogleMap,
   Marker,
+  OverlayView,
   Polyline,
   useLoadScript,
 } from '@react-google-maps/api'
@@ -28,6 +29,19 @@ interface SafezoneInfo {
 
 const formatCoord = (point: Point | null) =>
   point ? `${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}` : 'ยังไม่มีพิกัด'
+
+const distanceMeters = (a: Point, b: Point) => {
+  const toRad = (deg: number) => (deg * Math.PI) / 180
+  const R = 6371000
+  const dLat = toRad(b.lat - a.lat)
+  const dLng = toRad(b.lng - a.lng)
+  const lat1 = toRad(a.lat)
+  const lat2 = toRad(b.lat)
+  const h =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) * Math.sin(dLng / 2)
+  return 2 * R * Math.asin(Math.sqrt(h))
+}
 
 const mapStyle: React.CSSProperties = {
   width: '100vw',
@@ -52,6 +66,10 @@ const RealtimeMap = () => {
     duration: '-',
   })
   const [ctx, setCtx] = useState({ usersId: 0, takecareId: 0, safezoneId: 0 })
+  const isMarkersClose = useMemo(
+    () => !!(caregiver && dependent && distanceMeters(caregiver, dependent) < 40),
+    [caregiver, dependent]
+  )
 
   const googleNavUrl = useMemo(() => {
     if (!dependent) return ''
@@ -262,8 +280,6 @@ const RealtimeMap = () => {
         {dependent ? (
           <Marker
             position={dependent}
-            title="ผู้มีภาวะพึ่งพิง"
-            label={{ text: 'ผู้มีภาวะพึ่งพิง', color: '#b91c1c', fontWeight: '700', fontSize: '13px' }}
             icon={{
               path: google.maps.SymbolPath.CIRCLE,
               scale: 9,
@@ -278,8 +294,6 @@ const RealtimeMap = () => {
         {caregiver ? (
           <Marker
             position={caregiver}
-            title="ผู้ดูแล"
-            label={{ text: 'ผู้ดูแล', color: '#1d4ed8', fontWeight: '700', fontSize: '13px' }}
             icon={{
               path: google.maps.SymbolPath.CIRCLE,
               scale: 7,
@@ -289,6 +303,54 @@ const RealtimeMap = () => {
               strokeWeight: 2,
             }}
           />
+        ) : null}
+
+        {dependent ? (
+          <OverlayView
+            position={dependent}
+            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+            getPixelPositionOffset={(width, height) =>
+              isMarkersClose ? { x: 14, y: 8 } : { x: Math.floor(-width / 2), y: -height - 12 }
+            }
+          >
+            <div
+              style={{
+                background: 'rgba(185, 28, 28, 0.92)',
+                color: '#fff',
+                borderRadius: 8,
+                padding: '4px 8px',
+                fontSize: 12,
+                fontWeight: 700,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ผู้มีภาวะพึ่งพิง
+            </div>
+          </OverlayView>
+        ) : null}
+
+        {caregiver ? (
+          <OverlayView
+            position={caregiver}
+            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+            getPixelPositionOffset={(width, height) =>
+              isMarkersClose ? { x: -width - 14, y: -height - 12 } : { x: Math.floor(-width / 2), y: 10 }
+            }
+          >
+            <div
+              style={{
+                background: 'rgba(29, 78, 216, 0.92)',
+                color: '#fff',
+                borderRadius: 8,
+                padding: '4px 8px',
+                fontSize: 12,
+                fontWeight: 700,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ผู้ดูแล
+            </div>
+          </OverlayView>
         ) : null}
       </GoogleMap>
 
