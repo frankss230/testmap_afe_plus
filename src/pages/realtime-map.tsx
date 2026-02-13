@@ -299,34 +299,36 @@ const RealtimeMap = () => {
           left: 12,
           right: 12,
           zIndex: 20,
-          background: '#0f5f3b',
-          color: '#fff',
-          borderRadius: 14,
-          padding: '10px 14px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 10,
         }}
       >
-        <div style={{ fontSize: 19, fontWeight: 700 }}>{nav.instruction}</div>
-        <div style={{ fontSize: 14, opacity: 0.9 }}>{`${nav.duration} • ${nav.distance}`}</div>
-      </div>
-
-      <div
-        style={{
-          position: 'fixed',
-          top: 98,
-          left: 12,
-          right: 12,
-          zIndex: 20,
-          background: 'rgba(255, 255, 255, 0.95)',
-          color: '#111827',
-          borderRadius: 12,
-          padding: '10px 12px',
-          fontSize: 13,
-          fontWeight: 600,
-          lineHeight: 1.5,
-        }}
-      >
-        <div>ผู้ดูแล: {formatCoord(caregiver)}</div>
-        <div>ผู้มีภาวะพึ่งพิง: {formatCoord(dependent)}</div>
+        <div
+          style={{
+            background: '#0f5f3b',
+            color: '#fff',
+            borderRadius: 14,
+            padding: '10px 14px',
+          }}
+        >
+          <div style={{ fontSize: 19, fontWeight: 700 }}>{nav.instruction}</div>
+          <div style={{ fontSize: 14, opacity: 0.9 }}>{`${nav.duration} • ${nav.distance}`}</div>
+        </div>
+        <div
+          style={{
+            background: 'rgba(255, 255, 255, 0.95)',
+            color: '#111827',
+            borderRadius: 12,
+            padding: '10px 12px',
+            fontSize: 13,
+            fontWeight: 600,
+            lineHeight: 1.5,
+          }}
+        >
+          <div>ผู้ดูแล: {formatCoord(caregiver)}</div>
+          <div>ผู้มีภาวะพึ่งพิง: {formatCoord(dependent)}</div>
+        </div>
       </div>
 
       <div
