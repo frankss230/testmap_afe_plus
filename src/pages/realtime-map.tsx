@@ -76,6 +76,11 @@ const RealtimeMap = () => {
     duration: '-',
   })
   const [ctx, setCtx] = useState({ usersId: 0, takecareId: 0, safezoneId: 0 })
+  const caregiverRoleLabel = useMemo(() => {
+    const role = String(router.query.viewerRole || '').toLowerCase()
+    const fromGroup = String(router.query.fromGroup || '')
+    return role === 'staff' || fromGroup === '1' ? 'เจ้าหน้าที่' : 'ผู้ดูแล'
+  }, [router.query.viewerRole, router.query.fromGroup])
 
   const googleNavUrl = useMemo(() => {
     if (!dependent) return ''
@@ -352,7 +357,7 @@ const RealtimeMap = () => {
                 whiteSpace: 'nowrap',
               }}
             >
-              ผู้ดูแล
+              {caregiverRoleLabel}
             </div>
           </OverlayView>
         ) : null}
@@ -396,7 +401,7 @@ const RealtimeMap = () => {
           }}
         >
           <div>
-            <div style={{ fontWeight: 700 }}>ผู้ดูแล</div>
+            <div style={{ fontWeight: 700 }}>{caregiverRoleLabel}</div>
             <div>{formatCoord(caregiver)}</div>
           </div>
           <div>
@@ -424,7 +429,7 @@ const RealtimeMap = () => {
         <div>คำอธิบาย</div>
         <div style={{ color: '#16a34a' }}>● บ้าน: เขตปลอดภัย</div>
         <div style={{ color: '#b91c1c' }}>● ผู้มีภาวะพึ่งพิง</div>
-        <div style={{ color: '#1d4ed8' }}>● ผู้ดูแล</div>
+        <div style={{ color: '#1d4ed8' }}>● {caregiverRoleLabel}</div>
       </div>
 
       <div
