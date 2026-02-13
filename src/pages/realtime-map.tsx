@@ -26,6 +26,9 @@ interface SafezoneInfo {
   safezoneId: number
 }
 
+const formatCoord = (point: Point | null) =>
+  point ? `${point.lat.toFixed(6)}, ${point.lng.toFixed(6)}` : 'ยังไม่มีพิกัด'
+
 const mapStyle: React.CSSProperties = {
   width: '100vw',
   height: '100vh',
@@ -259,6 +262,8 @@ const RealtimeMap = () => {
         {dependent ? (
           <Marker
             position={dependent}
+            title="ผู้มีภาวะพึ่งพิง"
+            label={{ text: 'ผู้มีภาวะพึ่งพิง', color: '#b91c1c', fontWeight: '700', fontSize: '13px' }}
             icon={{
               path: google.maps.SymbolPath.CIRCLE,
               scale: 9,
@@ -273,6 +278,8 @@ const RealtimeMap = () => {
         {caregiver ? (
           <Marker
             position={caregiver}
+            title="ผู้ดูแล"
+            label={{ text: 'ผู้ดูแล', color: '#1d4ed8', fontWeight: '700', fontSize: '13px' }}
             icon={{
               path: google.maps.SymbolPath.CIRCLE,
               scale: 7,
@@ -300,6 +307,26 @@ const RealtimeMap = () => {
       >
         <div style={{ fontSize: 19, fontWeight: 700 }}>{nav.instruction}</div>
         <div style={{ fontSize: 14, opacity: 0.9 }}>{`${nav.duration} • ${nav.distance}`}</div>
+      </div>
+
+      <div
+        style={{
+          position: 'fixed',
+          top: 98,
+          left: 12,
+          right: 12,
+          zIndex: 20,
+          background: 'rgba(255, 255, 255, 0.95)',
+          color: '#111827',
+          borderRadius: 12,
+          padding: '10px 12px',
+          fontSize: 13,
+          fontWeight: 600,
+          lineHeight: 1.5,
+        }}
+      >
+        <div>ผู้ดูแล: {formatCoord(caregiver)}</div>
+        <div>ผู้มีภาวะพึ่งพิง: {formatCoord(dependent)}</div>
       </div>
 
       <div
