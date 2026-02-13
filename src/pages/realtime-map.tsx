@@ -7,7 +7,6 @@ import {
   DirectionsRenderer,
   GoogleMap,
   Marker,
-  OverlayView,
   Polyline,
   useLoadScript,
 } from '@react-google-maps/api'
@@ -287,6 +286,7 @@ const RealtimeMap = () => {
             />
             <Marker
               position={{ lat: safezone.lat, lng: safezone.lng }}
+              title="เขตปลอดภัย"
               icon={{
                 url: createHomeIconUrl(),
                 scaledSize: new window.google.maps.Size(34, 34),
@@ -299,6 +299,7 @@ const RealtimeMap = () => {
         {dependent ? (
           <Marker
             position={dependent}
+            title="ผู้มีภาวะพึ่งพิง"
             icon={{
               url: createPersonIconUrl('#ef4444'),
               scaledSize: new window.google.maps.Size(34, 34),
@@ -310,6 +311,7 @@ const RealtimeMap = () => {
         {caregiver ? (
           <Marker
             position={caregiver}
+            title={caregiverRoleLabel}
             icon={{
               url: createPersonIconUrl('#2F6FED'),
               scaledSize: new window.google.maps.Size(34, 34),
@@ -317,51 +319,6 @@ const RealtimeMap = () => {
             }}
           />
         ) : null}
-
-        {dependent ? (
-          <OverlayView
-            position={dependent}
-            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            getPixelPositionOffset={(width, height) => ({ x: Math.floor(-width / 2), y: -height - 10 })}
-          >
-            <div
-              style={{
-                background: 'rgba(185, 28, 28, 0.92)',
-                color: '#fff',
-                borderRadius: 8,
-                padding: '3px 8px',
-                fontSize: 12,
-                fontWeight: 700,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              ผู้มีภาวะพึ่งพิง
-            </div>
-          </OverlayView>
-        ) : null}
-
-        {caregiver ? (
-          <OverlayView
-            position={caregiver}
-            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            getPixelPositionOffset={(width) => ({ x: Math.floor(-width / 2), y: 12 })}
-          >
-            <div
-              style={{
-                background: 'rgba(29, 78, 216, 0.92)',
-                color: '#fff',
-                borderRadius: 8,
-                padding: '3px 8px',
-                fontSize: 12,
-                fontWeight: 700,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {caregiverRoleLabel}
-            </div>
-          </OverlayView>
-        ) : null}
-
       </GoogleMap>
 
       <div
@@ -410,28 +367,6 @@ const RealtimeMap = () => {
           </div>
         </div>
       </div>
-
-      <div
-        style={{
-          position: 'fixed',
-          top: 210,
-          left: 12,
-          zIndex: 20,
-          background: 'rgba(255, 255, 255, 0.95)',
-          color: '#111827',
-          borderRadius: 10,
-          padding: '8px 10px',
-          fontSize: 12,
-          fontWeight: 700,
-          lineHeight: 1.5,
-        }}
-      >
-        <div>คำอธิบาย</div>
-        <div style={{ color: '#16a34a' }}>● บ้าน: เขตปลอดภัย</div>
-        <div style={{ color: '#b91c1c' }}>● ผู้มีภาวะพึ่งพิง</div>
-        <div style={{ color: '#1d4ed8' }}>● {caregiverRoleLabel}</div>
-      </div>
-
       <div
         style={{
           position: 'fixed',
