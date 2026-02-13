@@ -135,6 +135,29 @@ const RealtimeMap = () => {
   }, [ctx])
 
   useEffect(() => {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) return
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        setCaregiver({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        })
+      },
+      () => {
+        // Keep safezone coordinates as fallback when location permission is denied.
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 3000,
+        timeout: 10000,
+      }
+    )
+
+    return () => navigator.geolocation.clearWatch(watchId)
+  }, [])
+
+  useEffect(() => {
     if (!isLoaded || !caregiver || !dependent) return
 
     const service = new window.google.maps.DirectionsService()
